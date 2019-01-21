@@ -3,4 +3,4 @@
 
 export FLASK_APP=lotusland
 export FLASK_ENV=development
-flask run --port=8080
+flask run --host=0.0.0.0 --port=8080

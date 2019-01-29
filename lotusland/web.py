@@ -1,3 +1,4 @@
+from captcha.image import ImageCaptcha
 import os
 from flask import current_app as app, Blueprint, send_from_directory, jsonify
 from lotusland import db

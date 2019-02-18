@@ -1,7 +1,9 @@
+import os
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from flask import current_app as app, g
 import pymongo
 from pymongo import MongoClient
-import os
 
 
 def get_db():
@@ -11,6 +13,24 @@ def get_db():
             password=app.config["MONGO_PASSWORD"],
         )
     return g.mongo_client.blog
+
+
+def get_posts_by_month(month):
+    start = month
+    end = start + relativedelta(months=1)
+    db = get_db()
+    coll = db.posts
+    ps = coll.find({
+        'date': {
+            '$gte': start,
+            '$lt': end,
+        }
+    }).sort('date', pymongo.DESCENDING)
+    posts = []
+    for p in ps:
+        del p['_id']
+        posts.append(p)
+    return posts
 
 
 def get_latest_post():

@@ -6,3 +6,4 @@ flask_cors
 pymongo
 torchvision
 python-dateutil
+pytorch-hrvvi-ext

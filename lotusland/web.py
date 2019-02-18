@@ -32,6 +32,13 @@ def get_posts_by_month():
     return jsonify(posts)
 
 
+@bp.route("/api/posts/search", methods=["GET"])
+def search_posts():
+    keyword = request.args.get('keyword')
+    posts = db.search_posts(keyword)
+    return jsonify(posts)
+
+
 @bp.route("/api/posts/latest", methods=["GET"])
 def get_latest_post():
     p = db.get_latest_post()

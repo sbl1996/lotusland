@@ -33,6 +33,21 @@ def get_posts_by_month(month):
     return posts
 
 
+def search_posts(keyword):
+    db = get_db()
+    coll = db.posts
+    ps = coll.find({
+        '$text': {
+            '$search': keyword,
+        }
+    })
+    posts = []
+    for p in ps:
+        del p['_id']
+        posts.append(p)
+    return posts
+
+
 def get_latest_post():
     db = get_db()
     coll = db.posts

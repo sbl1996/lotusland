@@ -47,4 +47,4 @@ def get_latest_post():
 
 @bp.route("/api/resume", methods=["GET"])
 def get_resume():
-    return send_from_directory(app.root_path, 'resume.pdf')
+    return send_from_directory(app.root_path, 'cv.pdf')

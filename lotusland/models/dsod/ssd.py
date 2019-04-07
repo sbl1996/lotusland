@@ -1,35 +1,6 @@
 import torch
 
-from hutil.detection import BoundingBox, BoundingBoxFormat, transform_bboxes, iou_1m, transform_bbox
-
-
-def non_max_suppression(boxes, confidences, max_boxes, iou_threshold, inplace=False):
-    r"""
-    Args:
-        boxes:       (N, 4)
-        confidences: (N,)
-        max_boxes (int): 
-        iou_threshold (float):
-    Returns:
-        indices: (N,)
-    """
-    if len(boxes) == 0:
-        return []
-    if not inplace:
-        boxes = boxes.clone()
-        confidences = confidences.clone()
-    boxes = boxes.view(-1, 4)
-    confidences = confidences.view(-1)
-    indices = []
-    while True:
-        ind = confidences.argmax()
-        indices.append(ind.item())
-        boxes_iou = iou_1m(boxes[ind], boxes)
-        mask = boxes_iou > iou_threshold
-        boxes.masked_fill_(mask.unsqueeze(-1), 0)
-        confidences.masked_fill_(mask, 0)
-        if len(indices) >= max_boxes or confidences.sum() == 0:
-            return indices
+from hutil.detection import BBox, transform_bboxes, iou_1m, transform_bbox, non_max_suppression
 
 
 def compute_default_boxes(lx, ly, scale, ars):
@@ -59,7 +30,7 @@ def compute_loc_target(gt_box, default_boxes):
 
 class SSDInference:
 
-    def __init__(self, width, height, f_default_boxes, num_classes, confidence_threshold=0.01, max_boxes=10, iou_threshold=0.45):
+    def __init__(self, width, height, f_default_boxes, num_classes, confidence_threshold=0.3, max_boxes=10, iou_threshold=0.45):
         self.width = width
         self.height = height
         self.f_default_boxes = f_default_boxes
@@ -85,7 +56,7 @@ class SSDInference:
             boxes[..., [0, 2]] *= self.width
             boxes[..., [1, 3]] *= self.height
             boxes = transform_bboxes(
-                boxes, format=BoundingBoxFormat.XYWH, to=BoundingBoxFormat.LTRB, inplace=True)
+                boxes, format=BBox.XYWH, to=BBox.LTRB, inplace=True)
             confidences = torch.softmax(logits, dim=-1)
 
             mask = confidences > self.confidence_threshold
@@ -96,15 +67,15 @@ class SSDInference:
                     bc_confidences = confidences[i, ..., c][bc_mask]
                     bc_boxes = boxes[i][bc_mask]
                     indices = non_max_suppression(
-                        bc_boxes, bc_confidences, self.max_boxes, self.iou_threshold)
+                        bc_boxes, bc_confidences, self.iou_threshold)
                     for ind in indices:
                         detections.append(
-                            BoundingBox(
+                            BBox(
                                 image_name=i,
                                 class_id=c,
                                 box=bc_boxes[ind].tolist(),
                                 confidence=bc_confidences[ind].item(),
-                                box_format=BoundingBoxFormat.LTRB,
+                                box_format=BBox.LTRB,
                             )
                         )
         return detections

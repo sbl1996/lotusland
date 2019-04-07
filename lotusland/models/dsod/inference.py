@@ -7,7 +7,7 @@ import torch
 from torchvision.transforms import ToTensor, Resize, Compose
 
 from hutil.inference import freeze, clip
-from hutil.detection import BoundingBox, BoundingBoxFormat, iou_11, transform_bbox, scale_box, draw_bboxes
+from hutil.detection import BBox, iou_11, transform_bbox, scale_box, draw_bboxes
 
 from lotusland.models.dsod.ssd import SSDInference, compute_default_boxes, compute_scales
 from lotusland.models.dsod.model import DSOD
@@ -17,8 +17,8 @@ def filter_dets(dets):
     def t(d):
         return transform_bbox(
             d['bbox'],
-            BoundingBoxFormat.LTWH,
-            BoundingBoxFormat.LTRB
+            BBox.LTWH,
+            BBox.LTRB
         )
     ret = [dets[0]]
     for d in dets[1:]:
@@ -86,8 +86,8 @@ class CaptchaDSOD:
             {
                 "bbox": scale_box(
                     transform_bbox(d.box,
-                                   format=BoundingBoxFormat.LTRB,
-                                   to=BoundingBoxFormat.LTWH),
+                                   format=BBox.LTRB,
+                                   to=BBox.LTWH),
                     src_size=(self.width, self.height),
                     dst_size=img.size),
                 "label": self.letters[d.class_id],
@@ -108,8 +108,8 @@ def draw_bboxes(img, anns):
     for ann in anns:
         bbox = transform_bbox(
             ann["bbox"],
-            format=BoundingBoxFormat.LTWH,
-            to=BoundingBoxFormat.LTRB
+            format=BBox.LTWH,
+            to=BBox.LTRB
         )
         draw.rectangle(bbox, outline='red', width=1)
         draw.text(bbox[:2], ann["label"], fill='black')

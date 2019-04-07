@@ -45,6 +45,6 @@ def get_latest_post():
     return jsonify(p)
 
 
-@bp.route("/api/resume", methods=["GET"])
+@bp.route("/api/cv", methods=["GET"])
 def get_resume():
     return send_from_directory(app.root_path, 'cv.pdf')
